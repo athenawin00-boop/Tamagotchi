@@ -1,0 +1,250 @@
+/* 캐릭터 다마고치 — 테마의 !important 규칙과 섞이지 않도록 #ctama-win 접두와 고유 클래스만 쓴다 */
+#ctama-win {
+    --ctama-op: 1;
+    --ctama-fg: var(--SmartThemeBodyColor, #ddd);
+    --ctama-bg: var(--SmartThemeBlurTintColor, rgba(30, 30, 36, .9));
+    --ctama-bd: var(--SmartThemeBorderColor, rgba(255, 255, 255, .2));
+    --ctama-ac: var(--SmartThemeQuoteColor, #e0a36a);
+    position: fixed;
+    z-index: 3000;
+    width: 300px;
+    max-height: 85vh;
+    min-height: 44px;
+    display: flex;
+    flex-direction: column;
+    color: var(--ctama-fg);
+    background: var(--ctama-bg);
+    backdrop-filter: blur(var(--SmartThemeBlurStrength, 10px));
+    border: 1px solid var(--ctama-bd);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+    overflow: hidden;
+    resize: both;
+    min-width: 240px;
+    font-size: 0.92em;
+    opacity: var(--ctama-op);
+    transition: opacity .2s;
+    box-sizing: border-box;
+}
+#ctama-win:hover, #ctama-win:focus-within, #ctama-win.ctama-drag, #ctama-win.ctama-setopen { opacity: 1; }
+#ctama-win.ctama-mobile { resize: none; border-radius: 12px; }
+#ctama-win.ctama-collapsed { resize: none; height: auto !important; }
+#ctama-win *, #ctama-win *::before, #ctama-win *::after { box-sizing: border-box; }
+
+/* 머리줄 */
+#ctama-win .ctama-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px 6px 10px;
+    border-bottom: 1px solid var(--ctama-bd);
+    cursor: move; user-select: none; touch-action: none;
+    flex: 0 0 auto;
+}
+#ctama-win.ctama-mobile .ctama-head { cursor: default; }
+#ctama-win .ctama-mini { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; background: rgba(127, 127, 127, .25); }
+#ctama-win .ctama-mini:not([src]) { visibility: hidden; width: 0; margin-right: -8px; }
+#ctama-win .ctama-title { flex: 1 1 auto; min-width: 0; display: flex; align-items: baseline; gap: 6px; overflow: hidden; }
+#ctama-win .ctama-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#ctama-win .ctama-sub { opacity: .75; font-size: .88em; white-space: nowrap; flex: 0 0 auto; }
+#ctama-win .ctama-hbtns { display: flex; gap: 2px; flex: 0 0 auto; }
+#ctama-win .ctama-hbtn {
+    width: 26px; height: 26px; display: grid; place-items: center;
+    border-radius: 7px !important; cursor: pointer; opacity: .7;
+    background: transparent !important; border: 0 !important; color: inherit !important;
+}
+#ctama-win .ctama-hbtn:hover, #ctama-win .ctama-hbtn:focus-visible { opacity: 1; background: rgba(127, 127, 127, .2) !important; outline: none; }
+#ctama-win.ctama-setopen .ctama-hbtn[data-h="settings"] { opacity: 1; color: var(--ctama-ac) !important; }
+
+/* 본문: 한 덩어리로 스크롤 */
+#ctama-win .ctama-body { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; padding: 10px 12px 12px; min-height: 0; }
+#ctama-win.ctama-collapsed .ctama-body { display: none; }
+#ctama-win .ctama-empty { display: none; opacity: .8; text-align: center; padding: 18px 6px; }
+#ctama-win.ctama-none .ctama-empty { display: block; }
+#ctama-win.ctama-none .ctama-main { display: none; }
+
+/* 무대 */
+#ctama-win .ctama-stage { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+#ctama-win .ctama-bubble {
+    position: relative; max-width: 100%;
+    padding: 7px 11px; border-radius: 12px;
+    background: rgba(127, 127, 127, .16);
+    border: 1px solid var(--ctama-bd);
+    line-height: 1.45; text-align: center; word-break: keep-all; overflow-wrap: anywhere;
+    margin-bottom: 4px;
+}
+#ctama-win .ctama-bubble::after {
+    content: ''; position: absolute; left: 50%; bottom: -6px; width: 10px; height: 10px;
+    background: inherit; border-right: 1px solid var(--ctama-bd); border-bottom: 1px solid var(--ctama-bd);
+    transform: translateX(-50%) rotate(45deg); backdrop-filter: none;
+}
+#ctama-win .ctama-bubble.ctama-hidden { visibility: hidden; height: 0; padding: 0; margin: 0; border: 0; }
+#ctama-win .ctama-bubble.ctama-typing { animation: ctama-blink 1s infinite; letter-spacing: 3px; }
+
+#ctama-win .ctama-avwrap { position: relative; width: 96px; height: 96px; cursor: pointer; flex: 0 0 auto; }
+#ctama-win .ctama-av {
+    width: 96px; height: 96px; border-radius: 50%; object-fit: cover; object-position: top;
+    border: 2px solid var(--ctama-bd); background: rgba(127, 127, 127, .25);
+    animation: ctama-idle 3.2s ease-in-out infinite;
+    transition: filter .4s;
+}
+#ctama-win.ctama-happy .ctama-av { animation: ctama-bounce 1.4s ease-in-out infinite; }
+#ctama-win.ctama-sleeping .ctama-av { animation: ctama-breathe 4s ease-in-out infinite; filter: brightness(.65) saturate(.6); }
+#ctama-win.ctama-sick .ctama-av { animation: ctama-shiver 2.4s ease-in-out infinite; filter: saturate(.4) hue-rotate(40deg); }
+#ctama-win .ctama-avwrap.ctama-hop .ctama-av { animation: ctama-hop .5s ease-out; }
+#ctama-win .ctama-egg { display: none; position: absolute; inset: 0; font-size: 70px; line-height: 96px; text-align: center; animation: ctama-wobble 2.2s ease-in-out infinite; }
+#ctama-win.ctama-isegg .ctama-av { visibility: hidden; animation: none; }
+#ctama-win.ctama-isegg .ctama-egg { display: block; }
+#ctama-win .ctama-emo { position: absolute; right: -4px; bottom: -2px; font-size: 22px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .5)); }
+#ctama-win .ctama-zzz { display: none; position: absolute; right: -10px; top: -4px; font-weight: 700; color: var(--ctama-ac); }
+#ctama-win .ctama-zzz b, #ctama-win .ctama-zzz i { font-style: normal; display: inline-block; }
+#ctama-win.ctama-sleeping .ctama-zzz { display: block; animation: ctama-float 2.4s ease-in-out infinite; }
+#ctama-win.ctama-sleeping .ctama-zzz b { font-size: 1.2em; transform: translateY(-6px); }
+#ctama-win.ctama-sleeping .ctama-zzz i { font-size: 1.45em; transform: translateY(-12px); }
+#ctama-win .ctama-fx { position: absolute; left: 50%; top: 10%; font-size: 26px; pointer-events: none; animation: ctama-pop 1.1s ease-out forwards; }
+#ctama-win .ctama-status { opacity: .75; font-size: .88em; text-align: center; }
+
+#ctama-win .ctama-hatch {
+    display: none; margin: 8px auto 2px; width: max-content; padding: 6px 16px; cursor: pointer;
+    border-radius: 999px !important; font-weight: 700;
+    border: 1px solid var(--ctama-ac) !important; background: color-mix(in srgb, var(--ctama-ac) 22%, transparent) !important; color: inherit !important;
+}
+#ctama-win .ctama-hatch:hover, #ctama-win .ctama-hatch:focus-visible { background: color-mix(in srgb, var(--ctama-ac) 38%, transparent) !important; outline: none; }
+#ctama-win.ctama-isegg .ctama-hatch { display: block; }
+#ctama-win.ctama-isegg .ctama-bars, #ctama-win.ctama-isegg .ctama-acts, #ctama-win.ctama-isegg .ctama-talk { display: none; }
+
+/* 스프라이트 */
+#ctama-win .ctama-stage { position: relative; }
+#ctama-win .ctama-sprite { display: none; height: 160px; width: auto; max-width: 100%; object-fit: contain; animation: ctama-idle 3.2s ease-in-out infinite; transform-origin: bottom center; -webkit-user-drag: none; }
+#ctama-win.ctama-hasSprite .ctama-sprite { display: block; }
+#ctama-win.ctama-hasSprite .ctama-av, #ctama-win.ctama-hasSprite .ctama-emo, #ctama-win.ctama-hasSprite .ctama-zzz { display: none !important; }
+#ctama-win.ctama-hasSprite .ctama-avwrap { width: auto; height: auto; min-width: 96px; display: flex; justify-content: center; }
+#ctama-win.ctama-hasSprite.ctama-happy .ctama-sprite { animation: ctama-bounce 1.4s ease-in-out infinite; }
+#ctama-win.ctama-hasSprite.ctama-sleeping .ctama-sprite { animation: ctama-breathe 4s ease-in-out infinite; }
+#ctama-win.ctama-hasSprite.ctama-sick .ctama-sprite { animation: ctama-shiver 2.4s ease-in-out infinite; }
+#ctama-win .ctama-avwrap.ctama-hop .ctama-sprite { animation: ctama-hop .5s ease-out; }
+#ctama-win.ctama-mobile .ctama-sprite { height: 110px; }
+
+/* 옷장 */
+#ctama-win .ctama-wardrobe {
+    display: none; position: absolute; left: -44px; bottom: 4px; z-index: 2;
+    width: 32px; height: 32px; place-items: center; cursor: pointer; font-size: 17px;
+    border-radius: 50% !important; border: 1px solid var(--ctama-bd) !important; background: rgba(127, 127, 127, .14) !important;
+}
+#ctama-win.ctama-candress .ctama-wardrobe { display: grid; }
+#ctama-win .ctama-wardrobe:hover, #ctama-win .ctama-wardrobe:focus-visible, #ctama-win.ctama-closetopen .ctama-wardrobe { background: rgba(127, 127, 127, .3) !important; outline: none; }
+#ctama-win .ctama-closet {
+    display: none; width: 100%;
+    grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 5px;
+    padding: 6px; margin-top: 4px; border: 1px solid var(--ctama-bd); border-radius: 10px; background: rgba(127, 127, 127, .1);
+}
+#ctama-win.ctama-closetopen .ctama-closet { display: grid; }
+#ctama-win .ctama-cl {
+    display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px; cursor: pointer; min-width: 0;
+    border-radius: 8px !important; border: 1px solid transparent !important; background: transparent !important;
+}
+#ctama-win .ctama-cl:hover, #ctama-win .ctama-cl:focus-visible { background: rgba(127, 127, 127, .2) !important; outline: none; }
+#ctama-win .ctama-cl.ctama-cl-sel { border-color: var(--ctama-ac) !important; background: color-mix(in srgb, var(--ctama-ac) 18%, transparent) !important; font-weight: 700; }
+#ctama-win .ctama-cl img { height: 52px; width: auto; max-width: 100%; object-fit: contain; }
+#ctama-win .ctama-cl span { font-size: .75em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+/* 수치 */
+#ctama-win .ctama-bars { display: grid; gap: 5px; margin: 12px 0 10px; }
+#ctama-win .ctama-bar { display: grid; grid-template-columns: 18px 46px 1fr 26px; align-items: center; gap: 6px; }
+#ctama-win .ctama-bi { text-align: center; }
+#ctama-win .ctama-bl { font-size: .86em; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ctama-win .ctama-track { height: 8px; border-radius: 99px; background: rgba(127, 127, 127, .25); overflow: hidden; }
+#ctama-win .ctama-fill { display: block; height: 100%; border-radius: 99px; transition: width .5s ease; }
+#ctama-win .ctama-bv { text-align: right; font-variant-numeric: tabular-nums; font-size: .86em; opacity: .85; }
+#ctama-win .ctama-bar.ctama-low .ctama-fill { animation: ctama-blink 1.2s infinite; }
+#ctama-win .ctama-bar.ctama-low .ctama-bv { color: #e86a6a; opacity: 1; font-weight: 700; }
+
+/* 행동 버튼 (button 요소 대신 div — 테마의 button:focus 규칙 회피) */
+#ctama-win .ctama-acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+#ctama-win .ctama-act {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    padding: 6px 2px; min-width: 0; cursor: pointer; user-select: none;
+    border-radius: 10px !important; border: 1px solid var(--ctama-bd) !important;
+    background: rgba(127, 127, 127, .12) !important; color: inherit !important;
+    transition: transform .08s, background .15s;
+}
+#ctama-win .ctama-act:hover, #ctama-win .ctama-act:focus-visible { background: rgba(127, 127, 127, .26) !important; outline: none; }
+#ctama-win .ctama-act:active { transform: scale(.95); }
+#ctama-win .ctama-act.ctama-need { border-color: var(--ctama-ac) !important; background: color-mix(in srgb, var(--ctama-ac) 25%, transparent) !important; font-weight: 700; animation: ctama-blink 1.4s infinite; }
+#ctama-win .ctama-act.ctama-off { opacity: .35; cursor: not-allowed; animation: none; }
+#ctama-win .ctama-ai { font-size: 1.25em; line-height: 1.2; }
+#ctama-win .ctama-al { font-size: .82em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+/* 말 걸기 */
+#ctama-win .ctama-talk { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
+#ctama-win .ctama-input {
+    flex: 1 1 auto; min-width: 0; margin: 0 !important; height: 32px;
+    color: var(--ctama-fg) !important; background: rgba(127, 127, 127, .14) !important;
+    border: 1px solid var(--ctama-bd) !important; border-radius: 8px !important; padding: 0 9px !important;
+}
+#ctama-win .ctama-input::placeholder { color: var(--ctama-fg); opacity: .55; }
+#ctama-win .ctama-bubble i { opacity: .75; }
+
+/* 모바일은 작게: 아바타 축소, 행동 버튼 한 줄 */
+#ctama-win.ctama-mobile .ctama-body { padding: 8px 10px 10px; }
+#ctama-win.ctama-mobile .ctama-avwrap, #ctama-win.ctama-mobile .ctama-av { width: 64px; height: 64px; }
+#ctama-win.ctama-mobile .ctama-egg { font-size: 48px; line-height: 64px; }
+#ctama-win.ctama-mobile .ctama-emo { font-size: 17px; }
+#ctama-win.ctama-mobile .ctama-bars { margin: 8px 0; gap: 3px; }
+#ctama-win.ctama-mobile .ctama-acts { grid-template-columns: repeat(6, 1fr); gap: 4px; }
+#ctama-win.ctama-mobile .ctama-act { padding: 4px 0; }
+#ctama-win.ctama-mobile .ctama-al { font-size: .7em; }
+#ctama-win .ctama-send {
+    flex: 0 0 auto; width: 34px; height: 32px; display: grid; place-items: center; cursor: pointer;
+    border-radius: 8px !important; border: 1px solid var(--ctama-bd) !important; background: rgba(127, 127, 127, .12) !important; color: inherit !important;
+}
+#ctama-win .ctama-send:hover, #ctama-win .ctama-send:focus-visible { background: rgba(127, 127, 127, .26) !important; outline: none; }
+
+/* 기록 */
+#ctama-win .ctama-logbox { margin-top: 10px; }
+#ctama-win .ctama-logbox summary { cursor: pointer; opacity: .8; font-size: .88em; }
+#ctama-win .ctama-log { list-style: none; margin: 6px 0 0; padding: 0; font-size: .84em; display: grid; gap: 3px; }
+#ctama-win .ctama-log li { opacity: .85; overflow-wrap: anywhere; }
+#ctama-win .ctama-log time { opacity: .6; margin-right: 6px; font-variant-numeric: tabular-nums; }
+
+/* 창 안 설정 */
+#ctama-win .ctama-setslot:empty { display: none; }
+#ctama-win .ctama-setslot { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--ctama-bd); }
+
+/* 설정 패널(확장 탭/창 공용) */
+.ctama-settings { display: flex; flex-direction: column; gap: 6px; }
+.ctama-settings label:not(.checkbox_label) { display: flex; flex-direction: column; gap: 3px; font-size: .92em; }
+.ctama-settings .ctama-sec { border: 1px solid var(--SmartThemeBorderColor, rgba(127, 127, 127, .3)); border-radius: 8px; padding: 4px 8px 8px; }
+.ctama-settings .ctama-sec > summary { cursor: pointer; font-weight: 700; padding: 4px 0; }
+.ctama-settings .ctama-sec[open] > summary { margin-bottom: 4px; }
+.ctama-settings .ctama-sec > * + * { margin-top: 6px; }
+.ctama-settings small { opacity: .7; display: block; }
+.ctama-settings .text_pole { margin: 0; }
+.ctama-settings .ctama-reset { margin-top: 8px; width: 100%; justify-content: center; }
+.ctama-settings .ctama-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.ctama-settings .ctama-row .menu_button { flex: 1 1 auto; justify-content: center; white-space: nowrap; }
+.ctama-settings .ctama-sprinfo { font-size: .9em; }
+.ctama-settings .ctama-rules summary { cursor: pointer; font-size: .9em; opacity: .85; }
+.ctama-settings code { font-size: .9em; }
+.ctama-drawer .ctama-away { display: none; opacity: .8; }
+.ctama-drawer.ctama-isaway .ctama-away { display: block; }
+.ctama-drawer .ctama-bring { text-decoration: underline; cursor: pointer; }
+
+/* 입력창 버튼 */
+#ctama-sendbtn { position: relative; }
+#ctama-sendbtn.ctama-alert::after {
+    content: ''; position: absolute; top: 2px; right: 0; width: 8px; height: 8px; border-radius: 50%;
+    background: #e8574f; box-shadow: 0 0 0 2px var(--SmartThemeBlurTintColor, #222);
+}
+
+@keyframes ctama-idle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes ctama-bounce { 0%, 100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-7px) scale(1.02); } 60% { transform: translateY(0) scale(.98, 1.02); } }
+@keyframes ctama-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@keyframes ctama-shiver { 0%, 90%, 100% { transform: translateX(0); } 92% { transform: translateX(-2px); } 94% { transform: translateX(2px); } 96% { transform: translateX(-2px); } }
+@keyframes ctama-hop { 0% { transform: translateY(0); } 35% { transform: translateY(-14px) scale(1.04); } 70% { transform: translateY(0) scale(1.03, .97); } 100% { transform: none; } }
+@keyframes ctama-wobble { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-8deg); } 40% { transform: rotate(7deg); } 60% { transform: rotate(-4deg); } 80% { transform: rotate(0); } }
+@keyframes ctama-float { 0%, 100% { transform: translateY(0); opacity: .6; } 50% { transform: translateY(-5px); opacity: 1; } }
+@keyframes ctama-pop { 0% { transform: translate(-50%, 0) scale(.6); opacity: 0; } 20% { opacity: 1; transform: translate(-50%, -10px) scale(1.1); } 100% { transform: translate(-50%, -48px) scale(1); opacity: 0; } }
+@keyframes ctama-blink { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) {
+    #ctama-win .ctama-av, #ctama-win .ctama-egg, #ctama-win .ctama-zzz, #ctama-win .ctama-act, #ctama-win .ctama-fill { animation: none !important; }
+}
+#ctama-win.ctama-mobile.ctama-hasSprite .ctama-avwrap { width: auto; height: auto; }

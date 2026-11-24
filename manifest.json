@@ -1,0 +1,11 @@
+{
+    "display_name": "캐릭터 다마고치",
+    "loading_order": 100,
+    "requires": [],
+    "optional": ["connection-manager"],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "athenawin00-boop",
+    "version": "0.2.0",
+    "auto_update": false
+}
