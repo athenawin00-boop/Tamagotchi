@@ -226,7 +226,7 @@
 #ctama-win .ctama-bar.ctama-low .ctama-bi, #ctama-win .ctama-bar.ctama-low .ctama-bv { color: #e8574f; font-weight: 700; }
 
 /* 행동 버튼 (button 요소 대신 div — 테마의 button:focus 규칙 회피) */
-#ctama-win .ctama-acts { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+#ctama-win .ctama-acts { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px 4px; }
 #ctama-win .ctama-act {
     display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; cursor: pointer; user-select: none;
     padding: 0 !important; background: transparent !important; border: 0 !important; color: var(--ctama-dim) !important;
@@ -245,6 +245,22 @@
 #ctama-win .ctama-act.ctama-need { color: var(--ctama-fg) !important; font-weight: 700; }
 #ctama-win .ctama-act.ctama-off { opacity: .32; cursor: not-allowed; pointer-events: none; }
 #ctama-win .ctama-act.ctama-off .ctama-ai { animation: none; }
+
+#ctama-win .ctama-act.ctama-locked { opacity: .45; }
+#ctama-win .ctama-act.ctama-locked .ctama-ai { font-size: 11px; background: transparent; border: 1px dashed var(--ctama-line); }
+#ctama-win .ctama-act.ctama-locked:hover .ctama-ai { background: transparent; color: var(--ctama-fg); }
+
+/* 선물 */
+#ctama-win .ctama-gifts { display: none; padding: 7px 6px 6px; margin-top: 6px; border-radius: 12px !important; background: var(--ctama-soft); }
+#ctama-win.ctama-giftopen .ctama-gifts { display: block; animation: ctama-in .2s ease-out; }
+#ctama-win .ctama-ghead { font-size: 11px; color: var(--ctama-dim); text-align: center; margin-bottom: 5px; }
+#ctama-win .ctama-ggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 4px; }
+#ctama-win .ctama-gi { position: relative; width: 34px; height: 34px; display: grid; place-items: center; font-size: 14px; border-radius: 50% !important; background: var(--ctama-soft2); color: var(--ctama-fg); }
+#ctama-win .ctama-gift[data-g="special"] .ctama-gi { color: #e9b93f; }
+#ctama-win .ctama-gm { position: absolute; right: -4px; bottom: -3px; width: 15px; height: 15px; display: grid; place-items: center; font-size: 8px; border-radius: 50% !important; background: #8fa3b8; color: #fff; }
+#ctama-win .ctama-gm.ctama-gm-love { background: var(--ctama-heart); }
+#ctama-win .ctama-gm.ctama-gm-bad { background: #777; }
+#ctama-win .ctama-gift.ctama-off { opacity: .4; cursor: not-allowed; }
 
 /* 말 걸기 */
 #ctama-win .ctama-talk { position: relative; margin-top: 11px; }
