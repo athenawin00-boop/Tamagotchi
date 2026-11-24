@@ -21,20 +21,20 @@ const DEFAULTS = {
 };
 
 const STATS = [
-    { k: 'hunger', label: '포만감', icon: '🍚', color: '#e8a25a' },
-    { k: 'mood', label: '기분', icon: '💗', color: '#e77fa8' },
-    { k: 'energy', label: '에너지', icon: '⚡', color: '#c2bd45' },
-    { k: 'clean', label: '청결', icon: '🫧', color: '#5ab4e8' },
-    { k: 'bond', label: '친밀도', icon: '🤝', color: '#a98be0' },
+    { k: 'hunger', label: '포만감', fa: 'fa-utensils', color: '#eda55d' },
+    { k: 'mood', label: '기분', fa: 'fa-face-smile', color: '#e9c04f' },
+    { k: 'energy', label: '에너지', fa: 'fa-bolt', color: '#7fcf8a' },
+    { k: 'clean', label: '청결', fa: 'fa-droplet', color: '#62b6ee' },
+    { k: 'bond', label: '친밀도', fa: 'fa-heart', color: '#ec6a8c' },
 ];
 
 const ACTIONS = [
-    { k: 'feed', label: '밥', icon: '🍚' },
-    { k: 'play', label: '놀기', icon: '🎾' },
-    { k: 'sleep', label: '재우기', icon: '🌙' },
-    { k: 'wash', label: '씻기', icon: '🛁' },
-    { k: 'pet', label: '쓰다듬기', icon: '🫳' },
-    { k: 'med', label: '약', icon: '💊' },
+    { k: 'feed', label: '밥', fa: 'fa-utensils' },
+    { k: 'play', label: '놀기', fa: 'fa-gamepad' },
+    { k: 'sleep', label: '재우기', fa: 'fa-moon' },
+    { k: 'wash', label: '씻기', fa: 'fa-shower' },
+    { k: 'pet', label: '쓰담', fa: 'fa-hand-holding-heart' },
+    { k: 'med', label: '약', fa: 'fa-capsules' },
 ];
 
 const TIERS = [
@@ -200,15 +200,15 @@ function needsCare(p) {
 }
 
 function moodInfo(p) {
-    if (p.egg) return { emo: '🥚', text: '알' };
-    if (p.sleeping) return { emo: '💤', text: '자는 중' };
-    if (p.sick) return { emo: '🤒', text: '아픔' };
-    if (p.hunger < 25) return { emo: '😣', text: '배고픔' };
-    if (p.energy < 20) return { emo: '🥱', text: '졸림' };
-    if (p.clean < 25) return { emo: '💧', text: '꼬질꼬질' };
-    if (p.mood < 30) return { emo: '😞', text: '시무룩' };
-    if (p.mood >= 80) return { emo: '✨', text: '신남' };
-    return { emo: '🙂', text: '평온' };
+    if (p.egg) return { tone: 'calm', text: '알' };
+    if (p.sleeping) return { tone: 'sleep', text: '자는 중' };
+    if (p.sick) return { tone: 'bad', text: '아픔' };
+    if (p.hunger < 25) return { tone: 'warn', text: '배고픔' };
+    if (p.energy < 20) return { tone: 'warn', text: '졸림' };
+    if (p.clean < 25) return { tone: 'warn', text: '꼬질꼬질' };
+    if (p.mood < 30) return { tone: 'warn', text: '시무룩' };
+    if (p.mood >= 80) return { tone: 'good', text: '신남' };
+    return { tone: 'calm', text: '평온' };
 }
 
 const word = (v) => (v < 20 ? '매우 낮음' : v < 40 ? '낮음' : v < 70 ? '보통' : '높음');
@@ -517,19 +517,23 @@ function buildWindow() {
         <div class="ctama-empty">캐릭터와의 1:1 채팅을 열면 여기서 돌볼 수 있어요.</div>
         <div class="ctama-main">
           <div class="ctama-stage">
+            <span class="ctama-days"></span>
+            <div class="ctama-wardrobe" tabindex="0" role="button" title="옷 갈아입히기"><i class="fa-solid fa-shirt"></i></div>
             <div class="ctama-bubble"></div>
             <div class="ctama-avwrap" title="쓰다듬기">
-              <div class="ctama-wardrobe" tabindex="0" role="button" title="옷 갈아입히기">👕</div>
               <img class="ctama-av" alt="">
               <img class="ctama-sprite" alt="">
-              <div class="ctama-egg">🥚</div>
-              <span class="ctama-emo"></span>
+              <div class="ctama-egg"></div>
               <span class="ctama-zzz">z<b>z</b><i>z</i></span>
             </div>
             <div class="ctama-status"></div>
-            <div class="ctama-closet"></div>
+            <div class="ctama-hatch" tabindex="0" role="button">알 깨우기</div>
           </div>
-          <div class="ctama-hatch" tabindex="0" role="button">알 깨우기</div>
+          <div class="ctama-closet"></div>
+          <div class="ctama-bond" title="친밀도">
+            <i class="fa-solid fa-heart"></i><span class="ctama-tier"></span>
+            <span class="ctama-btrack"><span class="ctama-bfill"></span></span><span class="ctama-bnum"></span>
+          </div>
           <div class="ctama-bars"></div>
           <div class="ctama-acts"></div>
           <div class="ctama-talk">
@@ -542,14 +546,14 @@ function buildWindow() {
       </div>`;
     document.body.appendChild(w);
 
-    w.querySelector('.ctama-bars').innerHTML = STATS.map((s) => `
-      <div class="ctama-bar" data-k="${s.k}" title="${s.label}">
-        <span class="ctama-bi">${s.icon}</span><span class="ctama-bl">${s.label}</span>
-        <span class="ctama-track"><span class="ctama-fill" style="background:${s.color}"></span></span>
+    w.querySelector('.ctama-bars').innerHTML = STATS.filter((s) => s.k !== 'bond').map((s) => `
+      <div class="ctama-bar" data-k="${s.k}" title="${s.label}" style="--c:${s.color}">
+        <i class="fa-solid ${s.fa} ctama-bi"></i>
+        <span class="ctama-track"><span class="ctama-fill"></span></span>
         <span class="ctama-bv"></span>
       </div>`).join('');
     w.querySelector('.ctama-acts').innerHTML = ACTIONS.map((a) => `
-      <div class="ctama-act" data-a="${a.k}" tabindex="0" role="button"><span class="ctama-ai">${a.icon}</span><span class="ctama-al">${a.label}</span></div>`).join('');
+      <div class="ctama-act" data-a="${a.k}" tabindex="0" role="button"><span class="ctama-ai"><i class="fa-solid ${a.fa}"></i></span><span class="ctama-al">${a.label}</span></div>`).join('');
 
     const activate = (el, fn) => {
         el.addEventListener('click', fn);
@@ -706,12 +710,19 @@ function render() {
     for (const img of w.querySelectorAll('.ctama-av, .ctama-mini')) if (img.getAttribute('src') !== src) img.setAttribute('src', src);
     const mi = moodInfo(p);
     w.querySelector('.ctama-name').textContent = p.name;
-    w.querySelector('.ctama-sub').textContent = p.egg ? '알' : `${mi.emo} ${mi.text}`;
+    const sub = w.querySelector('.ctama-sub');
+    sub.textContent = mi.text;
+    sub.dataset.tone = mi.tone;
+    const hr = new Date().getHours();
+    w.dataset.tod = p.sleeping ? 'night' : hr >= 6 && hr < 10 ? 'morning' : hr >= 10 && hr < 17 ? 'day' : hr >= 17 && hr < 20 ? 'evening' : 'night';
+    w.querySelector('.ctama-days').textContent = p.egg ? '' : `D+${daysOf(p)}`;
+    w.querySelector('.ctama-tier').textContent = tierOf(p.bond);
+    w.querySelector('.ctama-bfill').style.width = `${Math.round(p.bond)}%`;
+    w.querySelector('.ctama-bnum').textContent = Math.round(p.bond);
     w.classList.toggle('ctama-isegg', !!p.egg);
     w.classList.toggle('ctama-sleeping', !!p.sleeping);
     w.classList.toggle('ctama-sick', !!p.sick);
     w.classList.toggle('ctama-happy', !p.egg && !p.sleeping && !p.sick && p.mood >= 70);
-    w.querySelector('.ctama-emo').textContent = p.egg ? '' : mi.emo;
     const spr = currentSprite(p);
     w.classList.toggle('ctama-hasSprite', !!spr);
     const sImg = w.querySelector('.ctama-sprite');
@@ -719,20 +730,19 @@ function render() {
     const canDress = !!spr && state.spr.outfits.length > 0 && !p.sleeping;
     w.classList.toggle('ctama-candress', canDress);
     if (!canDress) w.classList.remove('ctama-closetopen');
-    w.querySelector('.ctama-status').textContent = p.egg
-        ? '따뜻한 알이에요. 깨워 볼까요?'
-        : `${tierOf(p.bond)} · 함께한 지 ${daysOf(p)}일째`;
+    w.querySelector('.ctama-status').textContent = p.egg ? '따뜻한 알이에요. 깨워 볼까요?' : '';
     const bub = w.querySelector('.ctama-bubble');
-    bub.innerHTML = esc(p.line || '').replace(/\*([^*]+)\*/g, '<i>$1</i>');
+    const typing = state.busy && p.line === '…';
+    bub.innerHTML = typing ? '<span class="ctama-dots"><b></b><b></b><b></b></span>' : esc(p.line || '').replace(/\*([^*]+)\*/g, '<i>$1</i>');
     bub.classList.toggle('ctama-hidden', !p.line);
-    bub.classList.toggle('ctama-typing', state.busy && p.line === '…');
 
     for (const s of STATS) {
+        if (s.k === 'bond') continue;
         const el = w.querySelector(`.ctama-bar[data-k="${s.k}"]`);
         const v = Math.round(p[s.k]);
         el.querySelector('.ctama-fill').style.width = `${v}%`;
         el.querySelector('.ctama-bv').textContent = v;
-        el.classList.toggle('ctama-low', s.k !== 'bond' && v < 20);
+        el.classList.toggle('ctama-low', v < 20);
     }
     for (const el of w.querySelectorAll('.ctama-act')) {
         const k = el.dataset.a;
@@ -740,7 +750,7 @@ function render() {
         if (p.sleeping && !['sleep', 'pet'].includes(k)) off = true;
         if (k === 'med') el.classList.toggle('ctama-need', p.sick);
         if (k === 'sleep') {
-            el.querySelector('.ctama-ai').textContent = p.sleeping ? '☀️' : '🌙';
+            el.querySelector('.ctama-ai i').className = `fa-solid ${p.sleeping ? 'fa-sun' : 'fa-moon'}`;
             el.querySelector('.ctama-al').textContent = p.sleeping ? '깨우기' : '재우기';
         }
         el.classList.toggle('ctama-off', off);
