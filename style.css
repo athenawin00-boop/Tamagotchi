@@ -202,7 +202,8 @@
     display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 2px 4px; cursor: pointer; min-width: 0;
     border-radius: 9px !important; border: 1px solid transparent !important; background: transparent !important; color: var(--ctama-dim) !important;
 }
-#ctama-win .ctama-cl:hover, #ctama-win .ctama-cl:focus-visible { background: var(--ctama-soft2) !important; outline: none; }
+@media (hover: hover) { #ctama-win .ctama-cl:hover { background: var(--ctama-soft2) !important; } }
+#ctama-win .ctama-cl:focus-visible, #ctama-win .ctama-cl:active { background: var(--ctama-soft2) !important; outline: none; }
 #ctama-win .ctama-cl.ctama-cl-sel { border-color: var(--ctama-heart) !important; background: color-mix(in srgb, var(--ctama-heart) 14%, transparent) !important; color: var(--ctama-fg) !important; font-weight: 700; }
 #ctama-win .ctama-cl img { height: 50px; width: auto; max-width: 100%; object-fit: contain; }
 #ctama-win .ctama-cl span { font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
@@ -238,7 +239,8 @@
     transition: transform .1s, background .15s, color .15s;
 }
 #ctama-win .ctama-al { font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-#ctama-win .ctama-act:hover .ctama-ai, #ctama-win .ctama-act:focus-visible .ctama-ai { background: color-mix(in srgb, var(--ctama-heart) 22%, transparent); color: var(--ctama-heart); }
+@media (hover: hover) { #ctama-win .ctama-act:hover .ctama-ai { background: color-mix(in srgb, var(--ctama-heart) 22%, transparent); color: var(--ctama-heart); } }
+#ctama-win .ctama-act:focus-visible .ctama-ai, #ctama-win .ctama-act:active .ctama-ai { background: color-mix(in srgb, var(--ctama-heart) 22%, transparent); color: var(--ctama-heart); }
 #ctama-win .ctama-act:focus-visible { outline: none; }
 #ctama-win .ctama-act:active .ctama-ai { transform: scale(.9); }
 #ctama-win .ctama-act.ctama-need .ctama-ai { background: #e8574f; color: #fff; animation: ctama-pulse 1.4s infinite; }
@@ -285,7 +287,41 @@
 #ctama-win .ctama-log li { color: var(--ctama-dim); overflow-wrap: anywhere; }
 #ctama-win .ctama-log time { opacity: .65; margin-right: 6px; font-variant-numeric: tabular-nums; }
 
-/* 모바일은 작게 */
+#ctama-win.ctama-tucked .ctama-body { display: none; }
+#ctama-win.ctama-tucked { opacity: .92; }
+
+/* 모바일: 손가락에 맞춘 크기 */
+#ctama-win.ctama-mobile { font-size: 14px; }
+#ctama-win.ctama-mobile .ctama-head { padding: 6px 6px 6px 12px; }
+#ctama-win.ctama-mobile .ctama-title { cursor: pointer; min-height: 36px; }
+#ctama-win.ctama-mobile .ctama-hbtn { width: 38px; height: 38px; font-size: 15px; }
+#ctama-win.ctama-mobile .ctama-wardrobe { width: 36px; height: 36px; font-size: 14px; }
+#ctama-win.ctama-mobile .ctama-bubble { font-size: 14px; max-width: calc(100% - 84px); }
+#ctama-win.ctama-mobile .ctama-ai { max-width: 44px; font-size: 16px; }
+#ctama-win.ctama-mobile .ctama-al, #ctama-win.ctama-mobile .ctama-cl span { font-size: 11.5px; }
+#ctama-win.ctama-mobile .ctama-bv, #ctama-win.ctama-mobile .ctama-bnum { font-size: 12px; }
+#ctama-win.ctama-mobile .ctama-track, #ctama-win.ctama-mobile .ctama-btrack { height: 6px; }
+#ctama-win.ctama-mobile .ctama-gi { width: 40px; height: 40px; font-size: 16px; }
+#ctama-win.ctama-mobile .ctama-ggrid, #ctama-win.ctama-mobile .ctama-closet { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
+#ctama-win.ctama-mobile .ctama-ghead, #ctama-win.ctama-mobile .ctama-logbox summary, #ctama-win.ctama-mobile .ctama-log { font-size: 12.5px; }
+#ctama-win.ctama-mobile .ctama-logbox summary { padding: 6px 2px; }
+/* 모바일: 캐릭터 왼쪽, 수치 오른쪽 */
+#ctama-win.ctama-compact:not(.ctama-isegg) .ctama-stage { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; justify-items: center; column-gap: 12px; row-gap: 6px; padding: 10px 12px 12px; }
+#ctama-win.ctama-compact:not(.ctama-isegg) .ctama-bubble { grid-column: 1 / -1; }
+#ctama-win.ctama-compact .ctama-stage .ctama-side { width: 100%; align-self: center; z-index: 1; }
+#ctama-win.ctama-compact .ctama-stage .ctama-bond { margin: 0 0 9px; }
+#ctama-win.ctama-compact .ctama-stage .ctama-bars { grid-template-columns: 1fr; gap: 8px; margin: 0; }
+#ctama-win.ctama-compact .ctama-stage .ctama-bubble.ctama-hidden + .ctama-avwrap { margin-top: 26px; }
+#ctama-win.ctama-compact .ctama-acts { margin-top: 10px; }
+#ctama-win.ctama-compact .ctama-sprite { height: 112px; }
+#ctama-win.ctama-short .ctama-sprite { height: 92px; }
+#ctama-win.ctama-short .ctama-acts { gap: 6px 4px; }
+#ctama-win.ctama-short .ctama-talk { margin-top: 8px; }
+/* iOS는 16px보다 작은 입력칸에 초점이 가면 화면을 확대한다 */
+#ctama-win.ctama-mobile .ctama-input { height: 40px; font-size: 16px; padding-right: 46px !important; }
+#ctama-win.ctama-mobile .ctama-send { width: 32px; height: 32px; font-size: 13px; }
+#ctama-win.ctama-mobile .ctama-body { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+
 #ctama-win.ctama-mobile .ctama-stage { min-height: 0; padding: 10px 10px 12px; }
 #ctama-win.ctama-mobile .ctama-avwrap, #ctama-win.ctama-mobile .ctama-av { width: 64px; height: 64px; }
 #ctama-win.ctama-mobile.ctama-hasSprite .ctama-avwrap, #ctama-win.ctama-mobile.ctama-isegg .ctama-avwrap { width: auto; height: auto; }
@@ -338,3 +374,12 @@
 @keyframes ctama-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @keyframes ctama-dot { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-3px); opacity: 1; } }
 @keyframes ctama-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(232, 87, 79, .5); } 50% { box-shadow: 0 0 0 5px rgba(232, 87, 79, 0); } }
+
+/* 터치 기기에서 떠 있는 창(태블릿, 가로 모드) */
+@media (pointer: coarse) {
+    #ctama-win .ctama-hbtn { width: 36px; height: 36px; font-size: 14px; }
+    #ctama-win .ctama-wardrobe { width: 34px; height: 34px; font-size: 13px; }
+    #ctama-win .ctama-input { height: 40px; font-size: 16px; padding-right: 46px !important; }
+    #ctama-win .ctama-send { width: 32px; height: 32px; font-size: 13px; }
+    #ctama-win { resize: none; }
+}

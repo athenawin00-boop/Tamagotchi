@@ -751,11 +751,13 @@ function buildWindow() {
           </div>
           <div class="ctama-closet"></div>
           <div class="ctama-gifts"></div>
+          <div class="ctama-side">
           <div class="ctama-bond" title="친밀도">
             <i class="fa-solid fa-heart"></i><span class="ctama-tier"></span>
             <span class="ctama-btrack"><span class="ctama-bfill"></span></span><span class="ctama-bnum"></span>
           </div>
           <div class="ctama-bars"></div>
+          </div>
           <div class="ctama-acts"></div>
           <div class="ctama-talk">
             <input type="text" class="text_pole ctama-input" maxlength="200" placeholder="말 걸기…">
@@ -829,6 +831,14 @@ function buildWindow() {
     }));
 
     setupDrag(w);
+    // 모바일: 이름 줄을 누르면 접기/펴기, 채팅 입력 중엔 머리줄만 남기고 비켜 준다
+    w.querySelector('.ctama-title').addEventListener('click', () => {
+        if (!isMobile()) return;
+        S.window.collapsed = !S.window.collapsed; save(); render(); place();
+    });
+    document.addEventListener('focusin', () => isMobile() && setTimeout(place, 350));
+    document.addEventListener('focusout', () => isMobile() && setTimeout(place, 350));
+    input.addEventListener('focus', () => { if (isMobile()) setTimeout(() => { place(); input.scrollIntoView({ block: 'nearest' }); }, 350); });
     new ResizeObserver(() => {
         if (state.dragging || isMobile() || S.window.collapsed || w.style.display === 'none') return;
         const r = w.getBoundingClientRect();
@@ -883,6 +893,14 @@ function setupDrag(w) {
     head.addEventListener('pointercancel', end);
 }
 
+// 모바일에선 수치를 캐릭터 옆(무대 안)으로 옮겨 세로 공간을 아낀다
+function dockSide(w, inStage) {
+    const side = w.querySelector('.ctama-side');
+    const stage = w.querySelector('.ctama-stage');
+    if (inStage && side.parentElement !== stage) w.querySelector('.ctama-avwrap').after(side);
+    else if (!inStage && side.parentElement === stage) w.querySelector('.ctama-gifts').after(side);
+}
+
 function place() {
     const w = $win();
     if (!w || w.style.display === 'none') return;
@@ -890,24 +908,43 @@ function place() {
     const vh = window.visualViewport?.height || window.innerHeight;
     if (isMobile()) {
         // 모바일: 입력창 바로 위에 붙인다(<html> transform 때문에 bottom 기준 fixed가 안 먹음)
-        w.classList.add('ctama-mobile');
+        w.classList.add('ctama-mobile', 'ctama-compact');
+        w.classList.toggle('ctama-short', vh < 700);
+        dockSide(w, true);
         w.style.width = `${vw - 8}px`;
         w.style.height = '';
         w.style.left = '4px';
         const sf = document.getElementById('send_form');
-        const top = sf ? sf.getBoundingClientRect().top : vh;
-        const maxH = Math.max(120, Math.min(vh * 0.6, top - 50));
+        const vv = window.visualViewport;
+        const vTop = vv?.offsetTop || 0;
+        // 채팅을 입력하느라 키보드가 올라와 있으면 머리줄만 남기고 비켜 준다
+        const kbOpen = !!vv && window.innerHeight - vv.height > 120;
+        w.classList.toggle('ctama-tucked', kbOpen && document.activeElement?.id === 'send_textarea');
+        // 키보드가 올라오면 보이는 영역이 줄어든다 → 입력창과 키보드 중 더 위쪽에 맞춘다
+        const sfTop = sf ? sf.getBoundingClientRect().top : vTop + vh;
+        const anchor = Math.min(sfTop, vTop + vh);
+        const maxH = Math.max(96, Math.min(vh * 0.62, anchor - vTop - 48));
         w.style.maxHeight = `${maxH}px`;
-        w.style.top = `${Math.max(4, top - w.offsetHeight - 6)}px`;
+        w.style.top = `${Math.max(vTop + 4, anchor - w.offsetHeight - 6)}px`;
         return;
     }
-    w.classList.remove('ctama-mobile');
-    w.style.maxHeight = '';
+    // 화면이 낮으면(휴대폰 가로 모드) 떠 있는 창도 압축 배치로
+    const low = vh < 520;
+    w.classList.remove('ctama-mobile', 'ctama-tucked');
+    w.classList.toggle('ctama-compact', low);
+    w.classList.toggle('ctama-short', low);
+    dockSide(w, low);
+    // 입력창을 가리지 않게(화면이 낮은 가로 모드 등)
+    const sfRect = document.getElementById('send_form')?.getBoundingClientRect();
+    const floor = sfRect && sfRect.top > 100 ? sfRect.top - 6 : vh - 4;
+    const tb = document.getElementById('top-bar')?.getBoundingClientRect();
+    const ceil = low && tb ? tb.bottom + 4 : 4;
+    w.style.maxHeight = `${Math.max(160, Math.min(vh * 0.85, floor - ceil - 4))}px`;
     w.style.width = `${Math.max(240, Math.min(S.window.w || 300, vw - 16))}px`;
     w.style.height = !S.window.collapsed && S.window.h ? `${Math.min(S.window.h, vh - 16)}px` : '';
     const ww = w.offsetWidth, wh = w.offsetHeight;
     let x = S.window.x ?? vw - ww - 16;
-    let y = S.window.y ?? 70;
+    let y = S.window.y ?? Math.max(ceil, Math.min(70, floor - wh));
     x = Math.max(4, Math.min(x, vw - ww - 4));
     y = Math.max(4, Math.min(y, vh - Math.min(wh, 60) - 4));
     w.style.left = `${x}px`;
